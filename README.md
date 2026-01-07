@@ -1,20 +1,21 @@
 # VPC Peering Connection Lab
 
-Laboratorio de AWS para aprender a crear y configurar una VPC Peering Connection usando Terraform.
+AWS learning laboratory to create and configure a VPC Peering Connection using Terraform.
 
-## Objetivo del Laboratorio
+## Lab Objective
 
-Este laboratorio enseña cómo conectar dos VPCs privadamente para permitir comunicación entre recursos en diferentes redes usando VPC Peering.
+This lab teaches how to connect two VPCs privately to enable communication between resources in different networks using VPC Peering.
 
-### Objetivos de Aprendizaje
+### Learning Objectives
 
-- ✅ Crear una VPC peering connection
-- 🚧 Configurar route tables para usar VPC peering
-- ⏳ Habilitar VPC Flow Logs para análisis de tráfico de red
-- ⏳ Probar la conexión de peering
-- ⏳ Analizar VPC flow logs
+- ✅ Create a VPC peering connection
+- ✅ Configure route tables to use VPC peering (in Terraform)
+- ⏳ Apply changes to AWS infrastructure
+- ⏳ Enable VPC Flow Logs for network traffic analysis
+- ⏳ Test the peering connection
+- ⏳ Analyze VPC flow logs
 
-## Arquitectura
+## Architecture
 
 ```
 ┌─────────────────────────────────┐      ┌─────────────────────────────────┐
@@ -38,112 +39,128 @@ Este laboratorio enseña cómo conectar dos VPCs privadamente para permitir comu
               ▲                                        ▲
               │                                        │
               └────────── VPC Peering (Lab-Peer) ─────┘
-                         pcx-0c6d5be7671e82bf0
+                         pcx-03db9740774b09684
 ```
 
-## Progreso Actual
+## Current Progress
 
-### ✅ Completado
+### ✅ Completed
 
-1. **Configuración inicial de Terraform**
-   - Provider de AWS configurado
-   - Variables definidas
-   - Outputs configurados
+1. **Initial Terraform Configuration**
+   - AWS provider configured
+   - Variables defined
+   - Outputs configured
 
 2. **VPC Peering Connection**
-   - Creado con ID: `pcx-0c6d5be7671e82bf0`
-   - Estado: `active`
-   - Conecta Lab VPC ↔ Shared VPC
+   - Created with ID: `pcx-03db9740774b09684`
+   - Status: `active`
+   - Connects Lab VPC ↔ Shared VPC
 
-### 🚧 Siguiente Paso: Configurar Route Tables
+3. **Route Tables Configuration (Terraform)**
+   - Data sources added to locate route tables by name
+   - Route resources created:
+     - Lab VPC → Shared VPC: `10.5.0.0/16` via peering
+     - Shared VPC → Lab VPC: `10.0.0.0/16` via peering
+   - Outputs added for route verification
 
-El VPC Peering está creado pero **no funcional todavía**. Necesita rutas en las route tables de ambas VPCs.
+### 🚧 Next Step: Apply Terraform Changes
 
-**Qué hacer:**
-- Agregar ruta en Lab VPC → destino: `10.5.0.0/16` → target: peering connection
-- Agregar ruta en Shared VPC → destino: `10.0.0.0/16` → target: peering connection
+The VPC Peering is created and routes are configured in Terraform, but **not yet applied to AWS**.
 
-### ⏳ Pendiente
+**What to do:**
+```bash
+terraform validate  # Validate configuration syntax
+terraform plan      # Preview changes (should show 2 routes to add)
+terraform apply     # Apply changes to AWS
+```
 
-- Habilitar VPC Flow Logs
-- Probar conectividad entre Application Server y MySQL
-- Analizar Flow Logs
+### ⏳ Pending
 
-## Estructura del Proyecto
+- Enable VPC Flow Logs
+- Test connectivity between Application Server and MySQL
+- Analyze Flow Logs
+
+## Project Structure
 
 ```
 VPC-Peering-Connection/
-├── provider.tf          # Configuración del provider AWS
-├── variables.tf         # Variables de entrada
-├── main.tf              # Data sources y recursos
-├── outputs.tf           # Información de salida
-├── terraform.tfstate    # Estado actual (generado automáticamente)
-├── CLAUDE.md           # Guía para Claude Code
-└── README.md           # Este archivo
+├── provider.tf          # AWS provider configuration
+├── variables.tf         # Input variables
+├── main.tf              # Data sources and resources
+├── outputs.tf           # Output values
+├── terraform.tfstate    # Current state (auto-generated)
+├── .terraform/          # Terraform plugins (auto-generated)
+├── CLAUDE.md            # Guide for Claude Code
+└── README.md            # This file
 ```
 
-## Comandos Terraform
+## Terraform Commands
 
-### Inicializar proyecto
+### Initialize project
 ```bash
 terraform init
 ```
 
-### Validar configuración
+### Validate configuration
 ```bash
 terraform validate
 ```
 
-### Ver plan de cambios
+### View change plan
 ```bash
 terraform plan
 ```
 
-### Aplicar cambios
+### Apply changes
 ```bash
 terraform apply
 ```
 
-### Ver outputs
+### View outputs
 ```bash
 terraform output
 ```
 
-### Ver estado actual
+### View current state
 ```bash
 terraform show
 ```
 
-### Destruir recursos
+### Destroy resources
 ```bash
 terraform destroy
 ```
 
-## Recursos Creados por Terraform
+## Resources Managed by Terraform
 
-- VPC Peering Connection: `Lab-Peer` (pcx-0c6d5be7671e82bf0)
+- VPC Peering Connection: `Lab-Peer` (pcx-03db9740774b09684)
+- Route in Lab VPC Public Route Table: 10.5.0.0/16 → pcx-03db9740774b09684
+- Route in Shared VPC Route Table: 10.0.0.0/16 → pcx-03db9740774b09684
 
-## Recursos Pre-existentes (consultados)
+## Pre-existing Resources (queried via data sources)
 
-- Lab VPC: vpc-0159d9ad4928cfac2 (10.0.0.0/16)
-- Shared VPC: vpc-0de1e63687b2d35f6 (10.5.0.0/16)
+- Lab VPC: vpc-0649d687ca4c9a8d1 (10.0.0.0/16)
+- Shared VPC: vpc-0709654eca0f343f5 (10.5.0.0/16)
+- Lab Public Route Table
+- Shared-VPC Route Table
 - Application Server (EC2)
 - MySQL RDS Instance
 
-## Información Importante
+## Important Information
 
-- **Región:** us-east-1
-- **Estilo de código:** Terraform en inglés, comentarios en español
-- **Objetivo educativo:** Aprender AWS y Terraform con mentoría paso a paso
+- **Region:** us-east-1
+- **Code style:** Terraform in English, comments in Spanish
+- **Educational objective:** Learn AWS and Terraform with step-by-step mentoring
 
-## Próximos Pasos
+## Next Steps
 
-1. Configurar route tables con recursos `aws_route`
-2. Habilitar VPC Flow Logs con IAM roles y CloudWatch Log Groups
-3. Probar conectividad Application Server → MySQL
-4. Analizar logs en CloudWatch
+1. ✅ ~~Configure route tables with `aws_route` resources~~ (Done in Terraform)
+2. 🚧 Apply Terraform changes (`terraform apply`)
+3. ⏳ Enable VPC Flow Logs with IAM roles and CloudWatch Log Groups
+4. ⏳ Test connectivity Application Server → MySQL
+5. ⏳ Analyze logs in CloudWatch
 
 ---
 
-**Última actualización:** 2026-01-06
-**Estado:** VPC Peering creado, pendiente configuración de rutas
+**Last updated:** 2026-01-07
+**Status:** Route tables configured in Terraform, pending apply
