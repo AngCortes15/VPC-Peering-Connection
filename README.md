@@ -170,18 +170,6 @@ terraform destroy
 
 - **Region:** us-east-1
 - **Code style:** Terraform in English, comments in Spanish
-- **Educational objective:** Learn AWS and Terraform with step-by-step mentoring
-- **Lab type:** AWS Academy/Hands-on Lab with pre-configured resources
-
-## Next Steps (Beyond This Lab)
-
-If you want to extend this lab, consider:
-1. Testing connectivity between Application Server and MySQL instance
-2. Analyzing VPC Flow Logs in CloudWatch
-3. Adding VPC Flow Logs for Lab VPC as well
-4. Implementing security group rules refinements
-5. Setting up CloudWatch alarms for traffic patterns
-
 ---
 
 **Last updated:** 2026-01-07
