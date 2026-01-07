@@ -9,11 +9,9 @@ This lab teaches how to connect two VPCs privately to enable communication betwe
 ### Learning Objectives
 
 - ✅ Create a VPC peering connection
-- ✅ Configure route tables to use VPC peering (in Terraform)
-- ⏳ Apply changes to AWS infrastructure
-- ⏳ Enable VPC Flow Logs for network traffic analysis
-- ⏳ Test the peering connection
-- ⏳ Analyze VPC flow logs
+- ✅ Configure route tables to use VPC peering
+- ✅ Enable VPC Flow Logs for network traffic analysis
+- ✅ Lab infrastructure fully deployed and configured
 
 ## Architecture
 
@@ -40,45 +38,38 @@ This lab teaches how to connect two VPCs privately to enable communication betwe
               │                                        │
               └────────── VPC Peering (Lab-Peer) ─────┘
                          pcx-03db9740774b09684
+
+                         VPC Flow Logs enabled ✓
+                         CloudWatch Log Group: ShareVPCFlowLogs
 ```
 
-## Current Progress
+## Completed Tasks
 
-### ✅ Completed
+### ✅ 1. Initial Terraform Configuration
+- AWS provider configured for us-east-1
+- Variables defined for VPC names and Flow Logs settings
+- Outputs configured for all resources
+- Data sources for existing AWS resources
 
-1. **Initial Terraform Configuration**
-   - AWS provider configured
-   - Variables defined
-   - Outputs configured
+### ✅ 2. VPC Peering Connection
+- Created with ID: `pcx-03db9740774b09684`
+- Status: `active`
+- Connects Lab VPC (vpc-0649d687ca4c9a8d1) ↔ Shared VPC (vpc-0709654eca0f343f5)
+- Auto-accept enabled (same account)
 
-2. **VPC Peering Connection**
-   - Created with ID: `pcx-03db9740774b09684`
-   - Status: `active`
-   - Connects Lab VPC ↔ Shared VPC
+### ✅ 3. Route Tables Configuration
+- Lab Public Route Table: Routes 10.5.0.0/16 traffic to peering connection
+- Shared-VPC Route Table: Routes 10.0.0.0/16 traffic to peering connection
+- Bidirectional routing fully functional
+- Data sources configured to locate route tables by name tag
 
-3. **Route Tables Configuration (Terraform)**
-   - Data sources added to locate route tables by name
-   - Route resources created:
-     - Lab VPC → Shared VPC: `10.5.0.0/16` via peering
-     - Shared VPC → Lab VPC: `10.0.0.0/16` via peering
-   - Outputs added for route verification
-
-### 🚧 Next Step: Apply Terraform Changes
-
-The VPC Peering is created and routes are configured in Terraform, but **not yet applied to AWS**.
-
-**What to do:**
-```bash
-terraform validate  # Validate configuration syntax
-terraform plan      # Preview changes (should show 2 routes to add)
-terraform apply     # Apply changes to AWS
-```
-
-### ⏳ Pending
-
-- Enable VPC Flow Logs
-- Test connectivity between Application Server and MySQL
-- Analyze Flow Logs
+### ✅ 4. VPC Flow Logs
+- Enabled for Shared VPC
+- CloudWatch Log Group: `ShareVPCFlowLogs` (auto-created)
+- Traffic type: ALL (captures both ACCEPT and REJECT)
+- Aggregation interval: 60 seconds (1 minute)
+- IAM Role: `vpc-flow-logs-Role` (pre-existing)
+- Destination: CloudWatch Logs
 
 ## Project Structure
 
@@ -90,6 +81,7 @@ VPC-Peering-Connection/
 ├── outputs.tf           # Output values
 ├── terraform.tfstate    # Current state (auto-generated)
 ├── .terraform/          # Terraform plugins (auto-generated)
+├── .terraform.lock.hcl  # Dependency lock file
 ├── CLAUDE.md            # Guide for Claude Code
 └── README.md            # This file
 ```
@@ -126,41 +118,71 @@ terraform output
 terraform show
 ```
 
-### Destroy resources
+### Destroy resources (cleanup)
 ```bash
 terraform destroy
 ```
 
 ## Resources Managed by Terraform
 
-- VPC Peering Connection: `Lab-Peer` (pcx-03db9740774b09684)
-- Route in Lab VPC Public Route Table: 10.5.0.0/16 → pcx-03db9740774b09684
-- Route in Shared VPC Route Table: 10.0.0.0/16 → pcx-03db9740774b09684
+### Created Resources:
+- **VPC Peering Connection**: `Lab-Peer` (pcx-03db9740774b09684)
+- **Route (Lab → Shared)**: 10.5.0.0/16 → pcx-03db9740774b09684
+- **Route (Shared → Lab)**: 10.0.0.0/16 → pcx-03db9740774b09684
+- **VPC Flow Log**: Shared VPC flow log with CloudWatch integration
 
-## Pre-existing Resources (queried via data sources)
-
+### Pre-existing Resources (referenced via data sources):
 - Lab VPC: vpc-0649d687ca4c9a8d1 (10.0.0.0/16)
 - Shared VPC: vpc-0709654eca0f343f5 (10.5.0.0/16)
 - Lab Public Route Table
 - Shared-VPC Route Table
+- IAM Role: vpc-flow-logs-Role
 - Application Server (EC2)
 - MySQL RDS Instance
 
-## Important Information
+### Auto-created Resources (by AWS):
+- CloudWatch Log Group: `ShareVPCFlowLogs`
+
+## Key Learnings from This Lab
+
+### AWS Concepts Covered:
+1. **VPC Peering**: Network connection between two VPCs using private IP addresses
+2. **Route Tables**: Configuring bidirectional routes for peering traffic
+3. **VPC Flow Logs**: Capturing and monitoring network traffic
+4. **CloudWatch Logs**: Centralized log management and analysis
+5. **IAM Roles**: Service-to-service permissions for Flow Logs
+
+### Terraform Concepts Applied:
+1. **Data Sources**: Querying existing AWS resources
+2. **Resources**: Creating and managing infrastructure
+3. **Variables**: Parameterizing configurations
+4. **Outputs**: Exposing resource information
+5. **Dependencies**: Automatic resource ordering by Terraform
+
+### Important Notes:
+- **CIDR Blocks**: Non-overlapping IP ranges required for VPC peering
+- **Bidirectional Routes**: Both VPCs need routes to enable communication
+- **Flow Log Aggregation**: 60-second intervals for near real-time monitoring
+- **IAM Permissions**: AWS Lab restrictions prevented tag creation on CloudWatch resources
+- **Auto-creation**: CloudWatch Log Groups can be auto-created by VPC Flow Logs service
+
+## Information
 
 - **Region:** us-east-1
 - **Code style:** Terraform in English, comments in Spanish
 - **Educational objective:** Learn AWS and Terraform with step-by-step mentoring
+- **Lab type:** AWS Academy/Hands-on Lab with pre-configured resources
 
-## Next Steps
+## Next Steps (Beyond This Lab)
 
-1. ✅ ~~Configure route tables with `aws_route` resources~~ (Done in Terraform)
-2. 🚧 Apply Terraform changes (`terraform apply`)
-3. ⏳ Enable VPC Flow Logs with IAM roles and CloudWatch Log Groups
-4. ⏳ Test connectivity Application Server → MySQL
-5. ⏳ Analyze logs in CloudWatch
+If you want to extend this lab, consider:
+1. Testing connectivity between Application Server and MySQL instance
+2. Analyzing VPC Flow Logs in CloudWatch
+3. Adding VPC Flow Logs for Lab VPC as well
+4. Implementing security group rules refinements
+5. Setting up CloudWatch alarms for traffic patterns
 
 ---
 
 **Last updated:** 2026-01-07
-**Status:** Route tables configured in Terraform, pending apply
+**Status:** ✅ Completed - All infrastructure deployed and configured successfully
