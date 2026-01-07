@@ -42,3 +42,14 @@ output "vpc_peering_details" { #Mostrar información completa del peering (útil
         accepter_vpc  = data.aws_vpc.shared_vpc.id
     }
 }
+
+#ROUTE TABLES INFORMATION
+output "lab_route_table_id" {
+  description = "ID of lab Public Route Table"
+  value = data.aws_route_table.lab_public_route_table.id
+}
+
+output "shared_route_table_id" {
+  description = "ID of Shared-VPC Route Table"
+  value = data.aws_route_table.shared_vpc_route_table.id
+}

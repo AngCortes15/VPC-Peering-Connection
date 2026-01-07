@@ -14,12 +14,20 @@ data "aws_vpc" "shared_vpc" { #Obtener Shared VPC existente
 }
 
 
-data "aws_route_tables" "lab_vpc_route_tables" { #Obtener route tables de Lab VPC
-vpc_id = data.aws_vpc.lab_vpc.id
+data "aws_route_table" "lab_public_route_table" { #Obtener route tables de Lab VPC
+  vpc_id = data.aws_vpc.lab_vpc.id
+  filter {
+    name = "tag:Name"
+    values = [ "Lab Public Route Table" ]
+  }
 }
 
-data "aws_route_tables" "shared_vpc_route_tables" { #Obtener route tables de Shared VPC
-vpc_id = data.aws_vpc.shared_vpc.id
+data "aws_route_table" "shared_vpc_route_table" { #Obtener route tables de Shared VPC
+  vpc_id = data.aws_vpc.shared_vpc.id
+  filter {
+    name = "tag:Name"
+    values = [ "Shared-VPC Route Table" ]
+  }
 }
 
 #VPC PEERING CONNECTION
@@ -32,4 +40,18 @@ resource "aws_vpc_peering_connection" "lab_peer" {
     Name = "Lab-Peer"
     Side = "Requester"
   }
+}
+
+#CONFIGURACION DE RUTAS PARA VPC PEERING
+
+resource "aws_route" "lab_to_shared" { #Ruta en Lab VPC: Enviar tráfico a Shared VPC (10.5.0.0/16) por el peering
+  route_table_id = data.aws_route_table.lab_public_route_table.id
+  destination_cidr_block = data.aws_vpc.shared_vpc.cidr_block #10.5.0.0/16
+  vpc_peering_connection_id = aws_vpc_peering_connection.lab_peer.id
+}
+
+resource "aws_route" "shared_to_lab" {
+  route_table_id = data.aws_route_table.shared_vpc_route_table.id
+  destination_cidr_block = data.aws_vpc.lab_vpc.cidr_block #10.0.0.0/16
+  vpc_peering_connection_id = aws_vpc_peering_connection.lab_peer.id
 }
