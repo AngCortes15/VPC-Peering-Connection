@@ -55,3 +55,27 @@ resource "aws_route" "shared_to_lab" {
   destination_cidr_block = data.aws_vpc.lab_vpc.cidr_block #10.0.0.0/16
   vpc_peering_connection_id = aws_vpc_peering_connection.lab_peer.id
 }
+
+# VPC FLOW LOGS CONFIGURATION
+
+# IAM Role para VPC Flow Logs (pre-existente en el lab)
+data "aws_iam_role" "vpc_flow_logs_role" {
+  name = "vpc-flow-logs-Role"
+}
+
+# Data source para obtener Account ID (necesario para construir el ARN del log group)
+data "aws_caller_identity" "current" {}
+
+# VPC Flow Log para Shared VPC
+# El CloudWatch Log Group se creará automáticamente (como en la consola)
+resource "aws_flow_log" "shared_vpc_flow_log" {
+  vpc_id                   = data.aws_vpc.shared_vpc.id
+  traffic_type             = var.flow_logs_traffic_type
+  iam_role_arn             = data.aws_iam_role.vpc_flow_logs_role.arn
+  log_destination_type     = "cloud-watch-logs"
+
+  # ARN del log group que AWS creará automáticamente
+  log_destination          = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:ShareVPCFlowLogs"
+
+  max_aggregation_interval = 60  # 1 minuti
+}

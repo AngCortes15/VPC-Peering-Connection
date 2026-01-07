@@ -53,3 +53,19 @@ output "shared_route_table_id" {
   description = "ID of Shared-VPC Route Table"
   value = data.aws_route_table.shared_vpc_route_table.id
 }
+
+# VPC FLOW LOGS INFORMATION
+output "flow_log_id" { #ID del VPC Flow Log
+description = "ID of VPC Flow Log for Shared VPC"
+value       = aws_flow_log.shared_vpc_flow_log.id
+}
+
+output "flow_log_destination" { #Destino del Flow Log (CloudWatch Log Group)
+description = "CloudWatch Log Group ARN for VPC Flow Logs"
+value       = aws_flow_log.shared_vpc_flow_log.log_destination
+}
+
+output "flow_log_status" { #Estado del Flow Log
+description = "Status of VPC Flow Log"
+value       = aws_flow_log.shared_vpc_flow_log.id != "" ? "Active" : "Unknown"
+}
